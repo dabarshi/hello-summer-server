@@ -41,7 +41,7 @@ async function run() {
       const result = await userCollection.find().toArray();
       res.send(result)
     })
-    
+
     app.post('/users', async (req, res) => {
       const user = req.body;
       const query = { email: user.email }
@@ -55,7 +55,13 @@ async function run() {
 
 
 
-    // Popular classes api
+    //  classe related api
+    app.get('/classes', async (req, res) => {
+      const result = await classCollection.find().sort({_id: -1}).toArray();
+      res.send(result);
+    })
+
+    // popular classes
     app.get('/Popularclasses', async (req, res) => {
       const result = await classCollection.find().sort({ "students": -1 }).limit(6).toArray();
       res.send(result);
