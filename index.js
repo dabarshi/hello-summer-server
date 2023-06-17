@@ -132,9 +132,17 @@ async function run() {
       const result = await selectedClassCollection.find(query).toArray();
       res.send(result);
     })
+    
     app.post('/selectedClasses', async(req, res) => {
       const selectedClass = req.body;
       const result = await selectedClassCollection.insertOne(selectedClass);
+      res.send(result);
+    })
+
+    app.delete('/selectedClasses/:id', async(req, res) => {
+      const _id = req.params.id;
+      const query = {_id: new ObjectId(_id)}
+      const result = await selectedClassCollection.deleteOne(query)
       res.send(result);
     })
 
