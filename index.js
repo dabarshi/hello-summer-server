@@ -53,6 +53,7 @@ async function run() {
 
     const userCollection = client.db("summerDB").collection("users");
     const classCollection = client.db("summerDB").collection("classes");
+    const selectedClassCollection = client.db("summerDB").collection("selectedClasses");
 
 
     // jwt token
@@ -85,8 +86,6 @@ async function run() {
     // upadate admin
     app.patch('/users/admin/:id', async (req, res) => {
       const id = req.params.id;
-      console.log(id)
-      console.log('hitt')
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: {
@@ -100,8 +99,6 @@ async function run() {
     // update instructor
     app.patch('/users/instructor/:id', async (req, res) => {
       const id = req.params.id;
-      console.log(id)
-      console.log("ins")
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: {
@@ -116,7 +113,9 @@ async function run() {
 
     //  classe related api
     app.get('/classes', async (req, res) => {
-      const result = await classCollection.find().sort({ _id: -1 }).toArray();
+      const email = req.query.email;
+      const query = { email: email };
+      const result = await classCollection.find(query).sort({ _id: -1 }).toArray();
       res.send(result);
     })
 
@@ -125,6 +124,20 @@ async function run() {
       const result = await classCollection.find().sort({ "students": -1 }).limit(6).toArray();
       res.send(result);
     })
+
+    // selected Classes collection
+    app.get('/selectedClasses', async (req, res) => {
+      const email = req.query.email;
+      const query = {"email": email}
+      const result = await selectedClassCollection.find(query).toArray();
+      res.send(result);
+    })
+    app.post('/selectedClasses', async(req, res) => {
+      const selectedClass = req.body;
+      const result = await selectedClassCollection.insertOne(selectedClass);
+      res.send(result);
+    })
+
 
 
 
