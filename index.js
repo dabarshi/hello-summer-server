@@ -13,8 +13,8 @@ app.use(express.json());
 
 const verifyJWT = (req, res, next) => {
   const authorization = req.headers.authorization;
-  if(!authorization) {
-    return res.status(401).send({ error: true, message: 'unauthorized access'});
+  if (!authorization) {
+    return res.status(401).send({ error: true, message: 'unauthorized access' });
   }
   // bearer token 
   const token = authorization.split(' ')[1];
@@ -22,7 +22,7 @@ const verifyJWT = (req, res, next) => {
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
 
     if (err) {
-      return res.status(401).send({ error: true, message: 'unauthorized access'});
+      return res.status(401).send({ error: true, message: 'unauthorized access' });
     }
     req.decoded = decoded;
     next();
@@ -84,6 +84,20 @@ async function run() {
       res.send(result);
     })
 
+    // admin check 
+    app.get('/users/admin/:email', verifyJWT, async (req, res) => {
+      const email = req.params.email;
+
+      if (req.decoded.email !== email) {
+        res.send({ admin: false })
+      }
+
+      const query = {email: email}
+      const user = await userCollection.findOne(query);
+      const result = {admin: user?.role === 'admin'}
+      res.send(result);
+    })
+
     // upadate admin
     app.patch('/users/admin/:id', async (req, res) => {
       const id = req.params.id;
@@ -129,35 +143,35 @@ async function run() {
     // selected Classes collection
     app.get('/selectedClasses', verifyJWT, async (req, res) => {
       const email = req.query.email;
-      const query = {email: email}
-      
+      const query = { email: email }
+
       const decodedEmail = req.decoded.email;
-      if(email !== decodedEmail){
-        return res.status(403).send({error: true, message: "Forbidden Access"})
+      if (email !== decodedEmail) {
+        return res.status(403).send({ error: true, message: "Forbidden Access" })
       }
 
       const result = await selectedClassCollection.find(query).toArray();
       res.send(result);
     })
-    
-    app.post('/selectedClasses', async(req, res) => {
+
+    app.post('/selectedClasses', async (req, res) => {
       const selectedClass = req.body;
       const result = await selectedClassCollection.insertOne(selectedClass);
       res.send(result);
     })
 
-    app.delete('/selectedClasses/:id', async(req, res) => {
+    app.delete('/selectedClasses/:id', async (req, res) => {
       const _id = req.params.id;
-      const query = {_id: new ObjectId(_id)}
+      const query = { _id: new ObjectId(_id) }
       const result = await selectedClassCollection.deleteOne(query)
       res.send(result);
     })
 
     // create payment intent
 
-    app.post('/create-payment-intent', async(req, res) => {
-      const {price} = req.body;
-      const amount = price*100;
+    app.post('/create-payment-intent', async (req, res) => {
+      const { price } = req.body;
+      const amount = price * 100;
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: 'usd',
