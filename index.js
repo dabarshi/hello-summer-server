@@ -113,6 +113,7 @@ async function run() {
     // student  check 
     app.get('/users/student/:email', verifyJWT, async (req, res) => {
       const email = req.params.email;
+      console.log(email)
 
       if (req.decoded.email !== email) {
         res.send({ student : false })
@@ -120,7 +121,7 @@ async function run() {
 
       const query = {email: email}
       const user = await userCollection.findOne(query);
-      const result = {student: user?.role === 'student '}
+      const result = {student: user?.role === 'student'}
       res.send(result);
     })
 
@@ -186,6 +187,16 @@ async function run() {
       res.send(result);
     })
 
+    // get single selected class
+    
+    app.get('/selectedClasses/:id', async (req, res) => {
+      const _id = req.params.id;
+      const query = { _id: new ObjectId(_id) }
+      const result = await selectedClassCollection.findOne(query)
+      res.send(result);
+    })
+
+    // delete a single selected class
     app.delete('/selectedClasses/:id', async (req, res) => {
       const _id = req.params.id;
       const query = { _id: new ObjectId(_id) }
